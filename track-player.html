@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Track Player - Echo Music</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body,
+        html {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0f;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+        }
+
+        header {
+            width: 100%;
+            max-width: 900px;
+            height: 60px;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+            margin-bottom: 2rem;
+            user-select: none;
+        }
+
+        header .logo {
+            color: #1DB954;
+            font-weight: 700;
+            font-size: 1.8rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        main {
+            background: #121217;
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 0 25px rgba(29, 185, 84, 0.5);
+            text-align: center;
+            user-select: none;
+        }
+
+        h1 {
+            color: #1DB954;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 1.5rem;
+            outline: none;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #1DB954aa;
+        }
+
+        #waveform {
+            width: 100%;
+            height: 100px;
+            background: #1a1a1f;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px #17a34a88;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem;
+            font-size: 1rem;
+        }
+
+        button.play-pause {
+            background: #1DB954;
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.7);
+            transition: background-color 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+        }
+
+        button.play-pause:hover {
+            background: #17a34a;
+            box-shadow: 0 6px 20px rgba(23, 163, 74, 0.9);
+        }
+
+        #progressContainer {
+            flex-grow: 1;
+            height: 8px;
+            background: #222227;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        #progressBar {
+            height: 100%;
+            width: 0%;
+            background: #1DB954;
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        #timeDisplay {
+            min-width: 70px;
+            font-weight: 600;
+            color: #ccc;
+            user-select: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 650px) {
+            main {
+                padding: 1.5rem;
+            }
+
+            #waveform {
+                height: 80px;
+            }
+
+            button.play-pause {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            #timeDisplay {
+                min-width: 60px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo" onclick="location.href='feed.html'">Echo Music</div>
+    </header>
+
+    <main role="main" aria-label="Single track player with waveform">
+        <h1>Track Player</h1>
+
+        <audio id="audio" preload="metadata" crossorigin="anonymous" tabindex="0" aria-label="Audio player">
+            <source
+                src="https://cdn.pixabay.com/download/audio/2022/03/03/audio_4a67a18f90.mp3?filename=summer-joy-110902.mp3"
+                type="audio/mpeg" />
+            Your browser does not support the audio element.
+        </audio>
+
+        <canvas id="waveform" aria-hidden="true" width="600" height="100"></canvas>
+
+        <div class="controls">
+            <button class="play-pause" id="playPauseBtn" aria-label="Play or pause the track"
+                title="Play/Pause">▶️</button>
+
+            <div id="progressContainer" aria-label="Audio progress bar" role="slider" tabindex="0" aria-valuemin="0"
+                aria-valuemax="100" aria-valuenow="0">
+                <div id="progressBar"></div>
+            </div>
+
+            <div id="timeDisplay" aria-live="polite" aria-atomic="true">0:00 / 0:00</div>
+        </div>
+    </main>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const canvas = document.getElementById('waveform');
+        const ctx = canvas.getContext('2d');
+
+        let isPlaying = false;
+        let animationId;
+
+        function updatePlayPauseIcon() {
+            playPauseBtn.textContent = audio.paused ? '▶️' : '⏸️';
+        }
+
+
+        function formatTime(sec) {
+            const minutes = Math.floor(sec / 60);
+            const seconds = Math.floor(sec % 60);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+
+        function updateProgress() {
+            const current = audio.currentTime;
+            const duration = audio.duration || 0;
+            const percent = duration ? (current / duration) * 100 : 0;
+            progressBar.style.width = `${percent}%`;
+            timeDisplay.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+            progressContainer.setAttribute('aria-valuenow', Math.floor(percent));
+        }
+
+        progressContainer.addEventListener('click', (e) => {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const width = rect.width;
+            const seekTime = (clickX / width) * (audio.duration || 0);
+            audio.currentTime = seekTime;
+        });
+
+        progressContainer.addEventListener('keydown', (e) => {
+            const duration = audio.duration || 0;
+            if (!duration) return;
+            let seekTime = audio.currentTime;
+            if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                seekTime = Math.min(duration, seekTime + 5);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                seekTime = Math.max(0, seekTime - 5);
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                seekTime = 0;
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                seekTime = duration;
+            } else {
+                return;
+            }
+            audio.currentTime = seekTime;
+        });
+
+        playPauseBtn.addEventListener('click', () => {
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
+        });
+
+        audio.addEventListener('play', () => {
+            isPlaying = true;
+            updatePlayPauseIcon();
+            drawWaveform();
+        });
+
+        audio.addEventListener('pause', () => {
+            isPlaying = false;
+            updatePlayPauseIcon();
+            cancelAnimationFrame(animationId);
+        });
+
+        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('ended', () => {
+            isPlaying = false;
+            updatePlayPauseIcon();
+            cancelAnimationFrame(animationId);
+        });
+
+        const WIDTH = canvas.width;
+        const HEIGHT = canvas.height;
+
+        const NUM_BARS = 80;
+        const BAR_WIDTH = WIDTH / NUM_BARS * 0.8;
+        const BAR_GAP = WIDTH / NUM_BARS * 0.2

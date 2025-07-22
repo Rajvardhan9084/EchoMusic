@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>QR Music Share - Echo Music</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at 20% 30%, #0a0a0f 0%, #000 100%);
+            color: #fff;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: conic-gradient(from 0deg, #1DB954, #12c2e9, #c471ed, #1DB954);
+            animation: rotateBg 30s linear infinite;
+            opacity: 0.07;
+            z-index: 0;
+        }
+
+        @keyframes rotateBg {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        header {
+            width: 100%;
+            max-width: 900px;
+            height: 60px;
+            margin: 2rem auto 1.5rem;
+            background: rgba(10, 10, 15, 0.9);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+            z-index: 2;
+            border-radius: 10px;
+        }
+
+        header .logo {
+            font-weight: 800;
+            font-size: 2rem;
+            color: #1DB954;
+            cursor: pointer;
+            animation: pulseGlow 3s infinite;
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 8px #015820, 0 0 15px #06f05899;
+            }
+
+            50% {
+                text-shadow: 0 0 12px #1DB954, 0 0 25px #1DB954aa;
+            }
+        }
+
+        main {
+            background: #121217;
+            border-radius: 20px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 480px;
+            margin: auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1.2s ease forwards;
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            box-shadow: 0 0 20px #1db95455;
+            transition: transform 0.5s ease;
+        }
+
+        main:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 0 30px #1db95488;
+        }
+
+        main::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 3px;
+            border-radius: 20px;
+            background: linear-gradient(120deg, #1DB954, #12c2e9, #c471ed, #1DB954);
+            z-index: -1;
+            background-size: 400% 400%;
+            animation: borderAnim 15s ease infinite;
+            filter: blur(4px);
+        }
+
+        @keyframes borderAnim {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        h1 {
+            color: #1DB954;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            animation: floatGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes floatGlow {
+
+            0%,
+            100% {
+                transform: translateY(0);
+                text-shadow: 0 0 5px #1DB95488;
+            }
+
+            50% {
+                transform: translateY(-5px);
+                text-shadow: 0 0 12px #1DB954aa;
+            }
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #ccc;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            border-radius: 12px;
+            border: none;
+            outline: none;
+            margin-bottom: 1.5rem;
+            background: #222227;
+            color: #eee;
+            transition: box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 12px #1DB954cc;
+        }
+
+        button.generate-btn {
+            background: linear-gradient(135deg, #1DB954, #12c2e9);
+            color: white;
+            font-weight: 700;
+            border: none;
+            border-radius: 30px;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button.generate-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #1db954aa;
+        }
+
+        button.generate-btn::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        button.generate-btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        #qrCode {
+            margin-top: 2rem;
+            display: inline-block;
+            animation: qrBounce 0.8s ease forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        @keyframes qrBounce {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        small {
+            display: block;
+            color: #888;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo" onclick="location.href='feed.html'">Echo Music</div>
+    </header>
+
+    <main>
+        <h1>Generate Music Share QR</h1>
+        <label for="songUrl">Enter the Song URL or Upload Link</label>
+        <input type="text" id="songUrl" placeholder="https://example.com/song.mp3" />
+        <small>Paste the URL you want to share</small>
+        <button class="generate-btn" id="generateBtn">Generate QR Code</button>
+        <div id="qrCode"></div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <script>
+        const generateBtn = document.getElementById('generateBtn');
+        const qrCodeContainer = document.getElementById('qrCode');
+        const songUrlInput = document.getElementById('songUrl');
+
+        generateBtn.addEventListener('click', () => {
+            const url = songUrlInput.value.trim();
+            if (!url) {
+                qrCodeContainer.innerHTML = '<p style="color:#ff4c4c;">Please enter a valid URL!</p>';
+                return;
+            }
+
+            qrCodeContainer.innerHTML = '';
+
+            QRCode.toCanvas(url, {
+                width: 220,
+                color: { dark: '#1DB954', light: '#ffffff00' }
+            }, function (error, canvas) {
+                if (error) {
+                    qrCodeContainer.innerHTML = '<p style="color:#ff4c4c;">Failed to generate QR code.</p>';
+                    console.error(error);
+                    return;
+                }
+                canvas.style.animation = "qrBounce 0.8s ease forwards";
+                qrCodeContainer.appendChild(canvas);
+            });
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const songPath = decodeURIComponent(params.get('song'));
+        if (songPath) {
+            songUrlInput.value = songPath;
+            generateBtn.click();
+        }
+
+        songUrlInput.addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') generateBtn.click();
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Echo Music – Home</title>
+    <script>
+        if (sessionStorage.getItem("loggedIn") !== "true") {
+            window.location.href = "login.html";
+        }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(to bottom, #0a0a0f, #141421);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(10, 10, 15, 0.95);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav ul li a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        nav ul li a:hover {
+            color: #1DB954;
+        }
+
+        main {
+            padding-top: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 3rem;
+        }
+
+        .hero {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem;
+            width: 100%;
+            max-width: 1200px;
+            flex-wrap: wrap;
+            animation: fadeIn 1s ease-in;
+        }
+
+        .hero-text {
+            max-width: 500px;
+            text-align: left;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #1DB954, #1ed760);
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: #1DB954;
+            color: #fff;
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #17a74a;
+        }
+
+        .hero-animation {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .hero-animation canvas {
+            width: 100%;
+            height: 400px;
+            display: block;
+        }
+
+        #songList {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .song-card {
+            background: #121217;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 0 15px #1db95455;
+            width: 260px;
+            transform: scale(1);
+            transition: transform 0.3s ease;
+        }
+
+        .song-card:hover {
+            transform: scale(1.05);
+        }
+
+        .song-card img {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .song-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #1DB954;
+        }
+
+        .song-artist {
+            color: #ccc;
+        }
+
+        canvas#waveCanvas {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            background: #1a1a1f;
+            border-radius: 12px;
+            margin-top: 2rem;
+            box-shadow: inset 0 0 20px #1DB95488;
+        }
+
+        audio {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 1rem;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #playPauseBtn {
+            margin-top: 1rem;
+            background-color: transparent;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        #playPauseBtn:hover {
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+            }
+
+            .hero-text {
+                text-align: center;
+                padding: 1rem 0;
+            }
+
+            .hero-animation canvas {
+                height: 250px;
+            }
+        }
+
+        /* Hidden iframe style */
+        #hiddenPlayer {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">Login</a></li>
+                <li><a href="feed.html">Discover</a></li>
+                <li><a href="upload.html">Upload</a></li>
+                <li><a href="profile.html">Profile</a></li>
+                <li><a href="qr-generator.html">QrCode</a></li>
+                <li><a href="#" onclick="logout()">Logout</a></li>
+
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="hero-text">
+                <h1>Hear the Future</h1>
+                <p>Explore, upload, and share your music on Echo Music.</p>
+                <button class="btn" onclick="location.href='feed.html'">Get Started</button>
+            </div>
+            <div class="hero-animation">
+                <canvas id="waveCanvas"></canvas>
+            </div>
+        </div>
+
+        <section id="songList"></section>
+
+        <audio id="audioPlayer" controls autoplay muted></audio>
+        <button id="playPauseBtn" class="btn" style="font-size: 1.5rem;">⏸️</button>
+
+        <iframe src="player.html" id="hiddenPlayer"></iframe>
+    </main>
+
+    <script>
+        const songs = [
+            { title: "Humnava Mere", artist: "Jubin Nautiyal", file: "https://mr-jat.in/dlod/6527?&volume=75&showstop=1&showvolume=1", image: "https://mr-jat.in/siteuploads/generaltheme/thumb/files/sft14/6527/6527-2.webp" },
+            { title: "Samjhawan", artist: " Jawad Ahmad, Toshi Sabri, Arijit Singh, Shreya Ghoshal", file: "https://mr-jat.in/dlod/5682?&volume=75&showstop=1&showvolume=1", image: "https://mr-jat.in/siteuploads/generaltheme/thumb/files/sft12/5682/5682-2.webp" },
+            { title: "Bekhayali", artist: "Kabir Singh", file: "https://pagalfree.com/musics/128-Bekhayali%20-%20Kabir%20Singh%20128%20Kbps.mp3", image: "https://i.pinimg.com/originals/50/b7/f5/50b7f55226035803806187ef8e9af227.jpg" },
+            { title: "Raabta", artist: "Arijit Singh", file: "https://pagalfree.com/musics/128-Raabta%20(Title%20Track)%20-%20Raabta%20128%20Kbps.mp3", image: "https://upload.wikimedia.org/wikipedia/en/8/8b/Raabta_poster.jpg" },
+            { title: "Kesariya", artist: "Arijit Singh", file: "https://mr-jat.in/dlod/5088?&volume=75&showstop=1&showvolume=1", image: "https://i.pinimg.com/736x/f6/7f/d3/f67fd38b97f1f7fefc47a4e10bbfb46c.jpg" },
+            { title: "Shayad", artist: "Pritam", file: "https://pagalfree.com/musics/192-Shayad%20(Reprise)%20-%20Love%20Aaj%20Kal%20192%20Kbps.mp3", image: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/9d/8a/c6/9d8ac667-9857-5794-0a57-b81ebb23aae4/886448257929.jpg/600x600bf-60.jpg" },
+            { title: "Tum Hi Ho", artist: "Arijit Singh", file: "https://pagalfree.com/musics/128-Tum%20Hi%20Ho%20-%20Aashiqui%202%20128%20Kbps.mp3", image: "https://tse3.mm.bing.net/th/id/OIP.GHKge6Z590muB-twsbGoAQHaDt?rs=1&pid=ImgDetMain&o=7&rm=3" },
+            { title: "Tu Hai Kahan", artist: "Aur", file: "https://mr-jat.in/dlod/6085?&volume=75&showstop=1&showvolume=1", image: "https://mr-jat.in/siteuploads/generaltheme/thumb/files/sft13/6085/6085-2.webp" },
+            { title: "Ilahi", artist: "Arijit Singh", file: "https://pagalnew.com/128-downloads/6101", image: "https://i.ytimg.com/vi/AicKz1ISNjU/maxresdefault.jpg" },
+            { title: "Chal Waha Jate Hai", artist: "Arijit Singh", file: "https://mr-jat.in/dlod/6448?&volume=75&showstop=1&showvolume=1", image: "https://mr-jat.in/siteuploads/generaltheme/thumb/files/sft13/6448/6448-2.webp" }
+        ];
+
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const audio = document.getElementById('audioPlayer');
+        const playPauseBtn = document.getElementById("playPauseBtn");
+
+        let audioCtx, analyser, source, dataArray, animationId;
+        let currentIndex = 0;
+
+        function setupAudioVisualizer() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 2048;
+                dataArray = new Uint8Array(analyser.frequencyBinCount);
+            }
+        }
+
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.clientWidth * dpr;
+            canvas.height = canvas.clientHeight * dpr;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+        }
+
+        function drawWaveform() {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            analyser.getByteTimeDomainData(dataArray);
+            ctx.clearRect(0, 0, width, height);
+
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#1DB954';
+            ctx.beginPath();
+
+            const sliceWidth = width / dataArray.length;
+            let x = 0;
+
+            for (let i = 0; i < dataArray.length; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = (v * height) / 2;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+                x += sliceWidth;
+            }
+
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+            animationId = requestAnimationFrame(drawWaveform);
+        }
+
+        function renderSongs() {
+            const container = document.getElementById("songList");
+            container.innerHTML = '';
+            songs.forEach((song, index) => {
+                const card = document.createElement("div");
+                card.className = "song-card";
+                card.innerHTML = ` 
+                    <img src="${song.image}" alt="Cover" />
+                    <div class="song-title">${song.title}</div>
+                    <div class="song-artist">${song.artist}</div>
+                    <button class="btn" onclick="shareQR('${song.file}')">📱 Share via QR</button>
+                `;
+
+                card.addEventListener("click", () => {
+                    currentIndex = index;
+                    playSong();
+                });
+                container.appendChild(card);
+            });
+        }
+
+        function playSong() {
+            if (currentIndex >= songs.length) return;
+            const song = songs[currentIndex];
+            audio.src = encodeURI(song.file);
+            audio.muted = false;
+            audio.play().then(() => {
+                setupAudioVisualizer();
+                cancelAnimationFrame(animationId);
+                drawWaveform();
+                playPauseBtn.textContent = "⏸️";
+            }).catch(err => {
+                console.warn("Autoplay blocked:", err);
+            });
+        }
+
+        function playNextSong() {
+            currentIndex++;
+            if (currentIndex < songs.length) playSong();
+        }
+
+        playPauseBtn.addEventListener("click", () => {
+            if (audio.paused || audio.ended) {
+                audio.muted = false;
+                audio.play().then(() => {
+                    setupAudioVisualizer();
+                    drawWaveform();
+                    playPauseBtn.textContent = "⏸️";
+                });
+            } else {
+                audio.pause();
+                playPauseBtn.textContent = "▶️";
+                cancelAnimationFrame(animationId);
+            }
+        });
+
+        audio.addEventListener("ended", playNextSong);
+
+        window.addEventListener('resize', resizeCanvas);
+        window.onload = () => {
+            resizeCanvas();
+            renderSongs();
+            playSong();
+        };
+
+        function shareQR(filePath) {
+            const encodedPath = encodeURIComponent(filePath);
+            window.location.href = `qr-generator.html?song=${encodedPath}`;
+        }
+    </script>
+    <script>
+        function logout() {
+            sessionStorage.removeItem("loggedIn");
+            window.location.href = "login.html";
+        }
+    </script>
+
+</body>
+
+</html>
